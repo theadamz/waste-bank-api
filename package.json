@@ -1,0 +1,29 @@
+{
+  "name": "waste-bank-api",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "test": "vitest",
+    "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile dist/app src/index.ts",
+    "db:push": "bunx drizzle-kit push",
+    "db:generate": "bunx drizzle-kit generate",
+    "db:migrate": "bunx drizzle-kit migrate",
+    "db:seed": "bun src/db/seeders/index.ts"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.7.3",
+    "@scalar/hono-api-reference": "^0.9.19",
+    "drizzle-orm": "^0.44.5",
+    "drizzle-seed": "^0.3.1",
+    "hono": "^4.9.9",
+    "pg": "^8.16.3",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/jest": "^30.0.0",
+    "@types/pg": "^8.15.5",
+    "drizzle-kit": "^0.31.5",
+    "tsx": "^4.20.6",
+    "vitest": "^3.2.4"
+  }
+}
