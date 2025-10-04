@@ -2,7 +2,7 @@
   "name": "waste-bank-api",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "test": "vitest",
+    "test": "bun test --bail",
     "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile dist/app src/index.ts",
     "db:push": "bunx drizzle-kit push",
     "db:generate": "bunx drizzle-kit generate",
@@ -23,7 +23,6 @@
     "@types/jest": "^30.0.0",
     "@types/pg": "^8.15.5",
     "drizzle-kit": "^0.31.5",
-    "tsx": "^4.20.6",
-    "vitest": "^3.2.4"
+    "tsx": "^4.20.6"
   }
 }

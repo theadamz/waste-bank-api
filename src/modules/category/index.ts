@@ -27,7 +27,7 @@ export default new Hono()
     page_size = page_size ?? process.env.PAGE_SIZE;
 
     // create query
-    let query = client
+    const query = client
       .select({ id: col.id, code: col.code, name: col.name, is_active: col.is_active })
       .from(categoriesTable)
       .where(and(...filters, or(...searching)))
@@ -141,7 +141,7 @@ export default new Hono()
       // get id
       const ids = c.req.valid("json");
 
-      // update data
+      // delete data
       const deletedIds: string[] = (await client.delete(categoriesTable).where(inArray(col.id, ids)).returning({ id: col.id })).map((col) => col.id);
 
       return c.json(

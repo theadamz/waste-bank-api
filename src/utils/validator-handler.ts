@@ -12,6 +12,7 @@ type errors = {
 };
 
 export const validatorHandler = (result: any, c: Context) => {
+  console.log(result);
   if (!result.success) {
     const errors: error[] = JSON.parse(result.error.message);
 
@@ -37,10 +38,10 @@ export const validatorHandler = (result: any, c: Context) => {
 
     return c.json(
       {
-        message: "Bad Request",
+        message: "Unprocessable Content",
         errors: refactorErrors,
       },
-      400
+      422
     );
   }
 };

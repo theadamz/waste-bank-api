@@ -7,6 +7,7 @@ export const errorHandler = (err: HTTPResponseError | Error, c: Context) => {
   c.status(500);
 
   if (err instanceof HTTPException) {
+    console.log("maybe here");
     return c.json(
       {
         message: err.message,
@@ -16,5 +17,7 @@ export const errorHandler = (err: HTTPResponseError | Error, c: Context) => {
     );
   }
 
-  return c.json(err.message);
+  return c.json({
+    message: err.message,
+  });
 };

@@ -1,8 +1,5 @@
-import { categoriesTable } from "@db/schemas/schema";
 import { commonDataPaging, commonDataPagingQueryString } from "@utils/common-model";
 import z from "zod";
-
-const columns = categoriesTable;
 
 export namespace CategoryModel {
   // basic form
