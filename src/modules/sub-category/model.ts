@@ -1,7 +1,8 @@
+import { client } from "@db/client";
 import { categoriesTable, categorySubsTable } from "@db/schemas/schema";
 import { isRecordExist } from "@utils/common-db-helper";
 import { commonDataPaging, commonDataPagingQueryString } from "@utils/common-model";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import z from "zod";
 
 export namespace CategorySubModel {
@@ -47,9 +48,19 @@ export namespace CategorySubModel {
   );
 
   // validation param id
-  export const categorySubDelete = z.array(
-    z.uuid({ abort: true }).refine(async (val) => {
-      return await isRecordExist({ table: categorySubsTable, filters: eq(categorySubsTable.id, val) });
-    })
-  );
+  export const categorySubDelete = z
+    .uuid({ abort: true })
+    .array()
+    .superRefine(async (values, ctx) => {
+      const data = (await client.select({ id: categorySubsTable.id }).from(categorySubsTable).where(inArray(categorySubsTable.id, values))).map((col) => col.id);
+
+      values.forEach((id, index) => {
+        if (!data.includes(id)) {
+          ctx.addIssue({
+            code: "custom",
+            path: [index],
+          });
+        }
+      });
+    });
 }

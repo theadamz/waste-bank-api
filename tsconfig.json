@@ -3,12 +3,11 @@
     "strict": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "baseUrl": "./",
     "paths": {
-      "@modules/*": ["src/modules/*"],
-      "@db/*": ["src/db/*"],
-      "@utils/*": ["src/utils/*"],
-      "@routes/*": ["src/routes/*"]
+      "@modules/*": ["./src/modules/*"],
+      "@db/*": ["./src/db/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@routes/*": ["./src/routes/*"]
     },
     "types": ["bun-types"],
     "esModuleInterop": true,

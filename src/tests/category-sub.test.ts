@@ -1,38 +1,44 @@
 import { client } from "@db/client";
-import { categoriesTable } from "@db/schemas/schema";
+import { categoriesTable, categorySubsTable } from "@db/schemas/schema";
 import { describe, expect, test } from "bun:test";
 import { inArray } from "drizzle-orm";
 import app from "../index";
 
-describe("category", () => {
+describe("category-sub", async () => {
+  const table = categorySubsTable;
+
+  // get category id
+  const categoryIds = (await client.select({ id: categoriesTable.id }).from(categoriesTable)).map((col) => col.id);
+
   let id: string;
+
   const data1 = {
+    category: categoryIds[Math.floor(Math.random() * categoryIds.length)],
     code: "TEST1",
     name: "Test1",
     is_active: true,
   };
+
   const data1new = {
+    category: categoryIds[Math.floor(Math.random() * categoryIds.length)],
     code: "NEW1",
     name: "NEW1",
     is_active: true,
   };
+
   const data2 = {
+    category: categoryIds[Math.floor(Math.random() * categoryIds.length)],
     code: "TEST2",
     name: "Test2",
-    is_active: false,
+    is_active: true,
   };
 
   test("clear data before test", async () => {
-    const deletedCodes: string[] = (
-      await client
-        .delete(categoriesTable)
-        .where(inArray(categoriesTable.code, [data1.code, data1new.code, data2.code]))
-        .returning({ code: categoriesTable.code })
-    ).map((col) => col.code);
+    await client.delete(table).where(inArray(table.code, [data1.code, data1new.code, data2.code]));
   });
 
-  test("GET /categories - show data with paging, it should return ok", async () => {
-    const res = await app.request("/api/v1/categories");
+  test("GET /sub-categories - show data with paging, it should return ok", async () => {
+    const res = await app.request("/api/v1/sub-categories");
 
     expect(res.status).toBe(200);
 
@@ -43,14 +49,14 @@ describe("category", () => {
     expect(json).toHaveProperty("data");
   });
 
-  test("POST /categories - check request validation", async () => {
-    const res = await app.request("api/v1/categories", {
+  test("POST /sub-categories - check request validation", async () => {
+    const res = await app.request("api/v1/sub-categories", {
       headers: {
         "Content-Type": "application/json",
       },
       method: "POST",
       body: JSON.stringify({
-        name: "New categories",
+        name: "New data",
       }),
     });
 
@@ -61,9 +67,9 @@ describe("category", () => {
     expect(json).toHaveProperty("errors.is_active", expect.objectContaining(expect.any(String)));
   });
 
-  test("POST /categories - create new data, it should return created", async () => {
+  test("POST /sub-categories - create new data, it should return created", async () => {
     // insert data1
-    const res = await app.request("api/v1/categories", {
+    const res = await app.request("api/v1/sub-categories", {
       headers: {
         "Content-Type": "application/json",
       },
@@ -82,7 +88,7 @@ describe("category", () => {
     id = json.data.id;
 
     // insert data2
-    const res2 = await app.request("api/v1/categories", {
+    const res2 = await app.request("api/v1/sub-categories", {
       headers: {
         "Content-Type": "application/json",
       },
@@ -99,8 +105,8 @@ describe("category", () => {
     expect(json2).toHaveProperty("data.is_active", data2.is_active);
   });
 
-  test("POST /categories - check duplicate when create new data, it should return conflict", async () => {
-    const res = await app.request("api/v1/categories", {
+  test("POST /sub-categories - check duplicate when create new data, it should return conflict", async () => {
+    const res = await app.request("api/v1/sub-categories", {
       headers: {
         "Content-Type": "application/json",
       },
@@ -112,8 +118,14 @@ describe("category", () => {
     expect(await res.json()).toHaveProperty("message", expect.stringContaining("already exists"));
   });
 
-  test("GET /categories/:id - show single data", async () => {
-    const res = await app.request(`/api/v1/categories/${id}`);
+  test("GET /sub-categories/:id - invalid id should return unprocessable", async () => {
+    const res = await app.request(`/api/v1/sub-categories/${crypto.randomUUID()}`);
+
+    expect(res.status).toBe(422);
+  });
+
+  test("GET /sub-categories/:id - show single data", async () => {
+    const res = await app.request(`/api/v1/sub-categories/${id}`);
 
     expect(res.status).toBe(200);
 
@@ -124,15 +136,20 @@ describe("category", () => {
     expect(json).toHaveProperty("data.is_active", data1.is_active);
   });
 
-  test("GET /categories/:id - show single data, but it shuld return not found", async () => {
-    const res = await app.request(`/api/v1/categories/${crypto.randomUUID()}`);
+  test("PUT /sub-categories/:id - check record exist when update data, it should return unprocessable", async () => {
+    const res = await app.request(`api/v1/sub-categories/${crypto.randomUUID()}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "PUT",
+      body: JSON.stringify(data2),
+    });
 
-    expect(res.status).toBe(404);
-    expect(await res.json()).toHaveProperty("message", expect.stringContaining("Not found"));
+    expect(res.status).toBe(422);
   });
 
-  test("PUT /categories/:id - update data, it should return ok", async () => {
-    const res = await app.request(`api/v1/categories/${id}`, {
+  test("PUT /sub-categories/:id - update data, it should return ok", async () => {
+    const res = await app.request(`api/v1/sub-categories/${id}`, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -149,21 +166,8 @@ describe("category", () => {
     expect(json).toHaveProperty("data.is_active", data1new.is_active);
   });
 
-  test("PUT /categories/:id - check record exist when update data, it should return not found", async () => {
-    const res = await app.request(`api/v1/categories/${crypto.randomUUID()}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "PUT",
-      body: JSON.stringify(data2),
-    });
-
-    expect(res.status).toBe(404);
-    expect(await res.json()).toHaveProperty("message", expect.stringContaining("Not found"));
-  });
-
-  test("PUT /categories/:id - check duplicate when update data, it should return conflict", async () => {
-    const res = await app.request(`api/v1/categories/${id}`, {
+  test("PUT /sub-categories/:id - check duplicate when update data, it should return conflict", async () => {
+    const res = await app.request(`api/v1/sub-categories/${id}`, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -175,8 +179,20 @@ describe("category", () => {
     expect(await res.json()).toHaveProperty("message", expect.stringContaining("already exists"));
   });
 
-  test("DELETE /categories/:id - delete data, it shuld return ok", async () => {
-    const res = await app.request("api/v1/categories", {
+  test("DELETE /sub-categories/:id - delete data validation, it shuld return unprocessable", async () => {
+    const res = await app.request("api/v1/sub-categories", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "DELETE",
+      body: JSON.stringify([crypto.randomUUID()]),
+    });
+
+    expect(res.status).toBe(422);
+  });
+
+  test("DELETE /sub-categories/:id - delete data, it shuld return ok", async () => {
+    const res = await app.request("api/v1/sub-categories", {
       headers: {
         "Content-Type": "application/json",
       },
@@ -192,11 +208,6 @@ describe("category", () => {
   });
 
   test("clear data for after test", async () => {
-    const deletedCodes: string[] = (
-      await client
-        .delete(categoriesTable)
-        .where(inArray(categoriesTable.code, [data1.code, data1new.code, data2.code]))
-        .returning({ code: categoriesTable.code })
-    ).map((col) => col.code);
+    await client.delete(table).where(inArray(table.code, [data1.code, data1new.code, data2.code]));
   });
 });
