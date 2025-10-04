@@ -3,8 +3,10 @@ import * as schema from "@db/schemas/schema";
 import { reset } from "drizzle-seed";
 import categorySubSeeder from "./category-sub.seeder";
 import CategorySeeder from "./category.seeder";
+import roleSeeder from "./role.seeder";
+import userSeeder from "./user.seeder";
 
-const seeds = [CategorySeeder, categorySubSeeder];
+const seeds = [roleSeeder, userSeeder, CategorySeeder, categorySubSeeder];
 
 const args = process.argv.slice(2);
 

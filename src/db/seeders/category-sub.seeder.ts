@@ -1,12 +1,14 @@
 import { client } from "@db/client";
 import { categoriesTable, categorySubsTable } from "@db/schemas/schema";
+import { getTableName } from "drizzle-orm";
 
-type CategorySub = typeof categorySubsTable.$inferInsert;
+const table = categorySubsTable;
+type Data = typeof table.$inferInsert;
 
 export default async function () {
   const categoryIds = await client.select({ id: categoriesTable.id }).from(categoriesTable);
 
-  const data: CategorySub[] = [
+  const values: Data[] = [
     {
       category_id: categoryIds[Math.floor(Math.random() * categoryIds.length)].id,
       code: "SUBCAT001",
@@ -27,7 +29,6 @@ export default async function () {
     },
   ];
 
-  const insert = await client.insert(categorySubsTable).values(data);
-
-  console.log(`New data in category_subs table created: `, insert.rowCount);
+  const insert = await client.insert(table).values(values);
+  console.log(`New data in ${getTableName(table)} table created: `, insert.rowCount);
 }

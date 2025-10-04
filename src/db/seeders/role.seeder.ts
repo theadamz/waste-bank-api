@@ -1,26 +1,26 @@
 import { client } from "@db/client";
-import { categoriesTable } from "@db/schemas/schema";
+import { rolesTable } from "@db/schemas/schema";
 import { getTableName } from "drizzle-orm";
 
-const table = categoriesTable;
+const table = rolesTable;
 type Data = typeof table.$inferInsert;
 
 export default async function () {
   const values: Data[] = [
     {
-      code: "TOY",
-      name: "Toys",
-      is_active: true,
+      code: "dev",
+      name: "Developer",
+      def_path: "/",
     },
     {
-      code: "PLSC",
-      name: "Plastic",
-      is_active: true,
+      code: "admin",
+      name: "Administrator",
+      def_path: "/",
     },
     {
-      code: "COMP",
-      name: "Computer",
-      is_active: true,
+      code: "cust",
+      name: "Customer",
+      def_path: "/clients",
     },
   ];
 
